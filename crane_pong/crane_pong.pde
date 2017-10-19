@@ -9,7 +9,10 @@ int analogPin1 = 1;
 PVector player1, player2; 
 int playerW = 15; // width of paddle
 int playerH = 60; // hieght of paddle
-int read;
+int control1 = 8;
+int control2 = 10;
+int read1;
+int read2;
 float px;
 float py;
 
@@ -26,6 +29,9 @@ void setup() {
   player2 = new PVector(width -20, height/2); 
   ball = new BallClass();
   arduino = new Arduino(this, Arduino.list()[5], 57600);
+  
+  arduino.pinMode(control1, Arduino.INPUT);//setup pins to be input (A0 = 0?)
+  arduino.pinMode(control2, Arduino.INPUT);//setup pins to be input (A0 = 0?)
 
   tsuru = loadImage("tsuru.png");
   imageMode(CENTER);
@@ -34,94 +40,49 @@ void setup() {
 
 void draw () {
   background (50);// background color
-  int pot1 = arduino.analogRead(analogPin); 
-  int pot2 = arduino.analogRead(analogPin1); 
-  player1.y = map(pot1, 0, 1023, 0, height); 
-  player2.y = map(pot2, 0, 1023, 0, height);
 
-  rect(player1.x, player1.y, playerW, playerH); 
-  rect(player2.x, player2.y, playerW, playerH); 
+  blueCrane();
+  redCrane();
   ball.move(); 
   ball.display();
+
+  read1=arduino.digitalRead(control1);
+  println("p1: "+ read1);
   
-   read=arduino.digitalRead(sensor);
-  println(read);
+  read2=arduino.digitalRead(control2);
+  println("p2: " + read2);
 }
 
-class BallClass {
-  PVector ballLoc, velocity; 
-  int ballsize = 64; // width of ball
-  BallClass() {
-    ballLoc = new PVector(width/2, height/2);
-    velocity  = new PVector(3, 3);
+void blueCrane() { 
+  //player1.y = map(pot1, 0, 1, 0, height); 
+  rect(player1.x, player1.y, playerW, playerH);
+
+  if (read1 == 1) { // check the state of our boolean
+    player1.y--;
+  } else { // if the boolean is false 
+    player1.y++;
   }
 
-  void move() {
-    ballLoc.add(velocity); 
-    if (ballLoc.x > width || ballLoc.x < 0) {
-      velocity.x *= -1;
-    }
-    if (ballLoc.y > height || ballLoc.y < 0) {
-      velocity.y *= -1;
-    }
+  if (player1.y < 0) { 
+    player1.y = 0;
+  } else if (player1.y > height) {
+    player1.y = height;
+  }
+}
 
-    //if (collide(player1.x, player1.y)) {
-    //  ballLoc.x = player1.x + playerW/2 + ballsize/2;
-    //  velocity.x *= -1;
-    //  velocity.y *= -1;
-    //}
+void redCrane() {
+   //player1.y = map(pot1, 0, 1, 0, height); 
+  rect(player2.x, player2.y, playerW, playerH);
 
-    //if (collide(player2.x, player2.y)) {
-    // //ballLoc.x = player1.x + playerW/2 + ballsize/2;
-    // velocity.x *= -1;
-    // velocity.y *= -1;
-    //}
-
-    //    if (ballLoc.x + ballsize/2 > player1.x - playerW/2 &&
-    //      ballLoc.x - ballsize/2 < player1.x + playerW/2 &&
-    //      ballLoc.y + ballsize/2 < player1.y + playerH/2 &&
-    //      ballLoc.y - ballsize/2 > player1.y - playerH/2) {
-    //      //velocity.x *= -1;
-    //      velocity.x *= -1;
-    //      velocity.y *= -1;
-    //    }
-
-    //    if (ballLoc.x + ballsize/2 > player2.x - playerW/2 &&
-    //      ballLoc.x - ballsize/2 < player2.x + playerW/2 &&
-    //      ballLoc.y + ballsize/2 < player2.y + playerH/2 &&
-    //      ballLoc.y - ballsize/2 > player2.y - playerH/2) {
-    //      //velocity.x *= -1;
-    //      velocity.x *= -1;
-    //      velocity.y *= -1;
-    //    }
-
-    if (paddleCollide(player1.x, player1.y)) {
-      velocity.x *= -1;
-      velocity.y *= -1;
-    }
-
-
-    if (paddleCollide(player2.x, player2.y)) {
-      velocity.x *= -1;
-      velocity.y *= -1;
-    }
+  if (read2 == 1) { // check the state of our boolean
+    player2.y--;
+  } else { // if the boolean is false 
+    player2.y++;
   }
 
-  boolean paddleCollide(float px, float py) {
-    if (ballLoc.x + ballsize/2 > px - playerW/2 && 
-      ballLoc.x - ballsize/2 < px + playerW/2 && 
-      ballLoc.y + ballsize/2 > py - playerH/2 && 
-      ballLoc.y - ballsize/2 < py + playerH/2 
-      ) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-
-  void display() {
-    ellipse(ballLoc.x, ballLoc.y, ballsize, ballsize);
-    //image(tsuru, ballLoc.x, ballLoc.y, ballsize, ballsize);
+  if (player2.y < 0) { 
+    player2.y = 0;
+  } else if (player2.y > height) {
+    player2.y = height;
   }
 }
