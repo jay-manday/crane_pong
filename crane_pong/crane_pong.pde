@@ -9,6 +9,7 @@ int analogPin1 = 1;
 PVector player1, player2; 
 int playerW = 15; // width of paddle
 int playerH = 60; // hieght of paddle
+int read;
 float px;
 float py;
 
@@ -24,7 +25,7 @@ void setup() {
   player1 = new PVector(20, height/2); 
   player2 = new PVector(width -20, height/2); 
   ball = new BallClass();
-  arduino = new Arduino(this, Arduino.list()[0], 57600);
+  arduino = new Arduino(this, Arduino.list()[5], 57600);
 
   tsuru = loadImage("tsuru.png");
   imageMode(CENTER);
@@ -42,6 +43,9 @@ void draw () {
   rect(player2.x, player2.y, playerW, playerH); 
   ball.move(); 
   ball.display();
+  
+   read=arduino.digitalRead(sensor);
+  println(read);
 }
 
 class BallClass {
@@ -117,7 +121,7 @@ class BallClass {
 
 
   void display() {
-    //ellipse(ballLoc.x, ballLoc.y, ballsize, ballsize);
-    image(tsuru, ballLoc.x, ballLoc.y, ballsize, ballsize);
+    ellipse(ballLoc.x, ballLoc.y, ballsize, ballsize);
+    //image(tsuru, ballLoc.x, ballLoc.y, ballsize, ballsize);
   }
 }
